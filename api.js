@@ -30,6 +30,15 @@ app.get('/api/users/:id', (req, res) => {
     data: users.find(item=>item.id===req.params.id)
   });
 });
+app.post('/api/register',(req,res)=>{
+  const user = req.body;
+  user.id = Date.now()+''
+  users.push(user)
+  res.json({
+    success: true,
+    data: user
+  });
+})
 app.post('/api/login', (req, res) => {
   const user = req.body;
   req.session.user = user;
