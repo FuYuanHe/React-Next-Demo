@@ -17,7 +17,11 @@ app.use(session({
 }))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const users = [{ id: '1', name: 'zhufeng1' }, { id: '2', name: 'zhufeng2' }, { id: '3', name: 'zhufeng3' }];
+const users = [
+  { id: '1', name: 'zhufeng1',createAt : new Date().toISOString() }, 
+  { id: '2', name: 'zhufeng2',createAt : new Date().toISOString() }, 
+  { id: '3', name: 'zhufeng3',createAt : new Date().toISOString() }
+];
 app.get('/api/users', (req, res) => {
   res.json({
     success: true,
@@ -33,6 +37,7 @@ app.get('/api/users/:id', (req, res) => {
 app.post('/api/register',(req,res)=>{
   const user = req.body;
   user.id = Date.now()+''
+  user.createAt = new Date().toISOString()
   users.push(user)
   res.json({
     success: true,
