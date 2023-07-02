@@ -43,7 +43,7 @@ app.post('/api/register',(req,res)=>{
     success: true,
     data: user
   });
-})
+});
 app.post('/api/login', (req, res) => {
   const user = req.body;
   req.session.user = user;
@@ -51,6 +51,20 @@ app.post('/api/login', (req, res) => {
     success: true,
     data: user
   });
+});
+app.get('/api/validate', (req, res) => {
+  const user = req.session.user;
+  if(user){
+    res.json({
+      success: true,
+      data: user
+    });
+  }else{
+    res.json({
+      success:false,
+      error:'用户未登陆'
+    })
+  }
 });
 app.get('/api/logout', (req, res) => {
   req.session.user = null;

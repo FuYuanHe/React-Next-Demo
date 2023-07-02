@@ -3,23 +3,56 @@ import Link from "next/link";
 import styles from './_app.module.css'
 import '../styles/global.css'
 import {Provider} from 'react-redux'
-import {getStore} from '../store'
+import createStore from '../store'
+import request from "utils/request";
+import { SET_USER_INFO } from "store/actionType";
 
+
+function getStore(initState){
+    // 区分服务器环境和客户端环境，每次都会创新新的仓库
+    if(typeof window === 'undefined'){
+        return createStore(initState)
+    }else{
+        // 客户端只会在首次创建仓库，之后使用老仓库
+        if(!window._REDUX_STORE_){
+            window._REDUX_STORE_ = createStore(initState)
+        }
+        return window._REDUX_STORE_
+    }
+}
 class LayoutApp extends App {
     constructor(props){
         super(props)
-        this.store = getStore()
+        this.store = getStore(props.initState)
     }
     static async getInitialProps({Component,ctx}){
+        const store = getStore()
+        if(typeof window === 'undefined'){
+            const options = {url:'/api/validate'}
+            if(ctx.req && ctx.req.headers.cookie){
+                options.headers = options.headers||{}
+                options.headers['cookie'] = ctx.req.headers.cookie
+            }
+            const response = await request(options).then(res=>res.data)
+            if(response.success){
+                store.dispatch({type:SET_USER_INFO,payload:response.data})
+            }
+        }
+        let props = {}
         let pageProps = {}
         if(Component.getInitialProps&&typeof Component.getInitialProps ==='function'){
             pageProps = await Component.getInitialProps(ctx)
         }
-        return {pageProps}
+        props.pageProps = pageProps
+        if(typeof window === 'undefined'){
+            props.initState = store.getState() 
+        }
+        // 在服务器端获取props，传递给constructor使用，在客户端使用
+        return props
     }
     render() {
         let { Component,pageProps } = this.props
-        const {currentUser} = this.store.getState()
+        const state = this.store.getState()
         return (
             <Provider store={this.store}>
                 <style>
@@ -40,7 +73,7 @@ class LayoutApp extends App {
                         <li><Link href={'/profile'}>个人中心</Link></li>
                         <li>
                             {
-                                currentUser?<span>{currentUser.name}</span>:<Link href={'/login'}>登录</Link>
+                                state.currentUser?<span>{state.currentUser.name}</span>:<Link href={'/login'}>登录</Link>
                             }
                         </li>
                     </ul>
