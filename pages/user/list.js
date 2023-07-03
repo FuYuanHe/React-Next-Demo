@@ -1,12 +1,12 @@
 import Link from "next/link"
 import Layout from "."
 import request from "utils/request"
-function UserList(props){
+function UserList(props) {
     return (
         <Layout>
             <ul>
                 {
-                    props.list && Array.isArray(props.list)&& props.list.map(user=><li key={user.id}><Link href={`/user/detail/${user.id}`}>{user.name}</Link></li>)
+                    props.list && Array.isArray(props.list) && props.list.map(user => <li key={user.id}><Link href={`/user/detail/${user.id}`}>{user.name}</Link></li>)
                 }
             </ul>
         </Layout>
@@ -21,13 +21,24 @@ function UserList(props){
 // }
 
 // 新的方法
-export async function getServerSideProps(){
-    // const res = await request.get('http://localhost:5000/api/users')
+// export async function getServerSideProps(){
+//     // const res = await request.get('http://localhost:5000/api/users')
+//     const res = await request.get('/api/users')
+//     return {
+//         props:{
+//             list:res.data.data
+//         }
+//     }
+// }
+
+// 仅会在编译阶段使用
+export async function getStaticProps() {
     const res = await request.get('/api/users')
     return {
-        props:{
-            list:res.data.data
+        props: {
+            list: res.data.data
         }
     }
 }
+
 export default UserList
