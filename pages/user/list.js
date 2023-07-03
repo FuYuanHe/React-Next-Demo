@@ -12,11 +12,22 @@ function UserList(props){
         </Layout>
     )
 }
-UserList.getInitialProps = async ()=>{
-    const response = await request.get('/api/users')
+// UserList.getInitialProps = async ()=>{
+//     const response = await request.get('/api/users')
 
+//     return {
+//         list:response.data.data
+//     }
+// }
+
+// 新的方法
+export async function getServerSideProps(){
+    // const res = await request.get('http://localhost:5000/api/users')
+    const res = await request.get('/api/users')
     return {
-        list:response.data.data
+        props:{
+            list:res.data.data
+        }
     }
 }
 export default UserList

@@ -6,7 +6,7 @@ import {Provider} from 'react-redux'
 import createStore from '../store'
 import request from "utils/request";
 import { SET_USER_INFO } from "store/actionType";
-
+import { Router } from "next/router";
 
 function getStore(initState){
     // 区分服务器环境和客户端环境，每次都会创新新的仓库
@@ -24,6 +24,9 @@ class LayoutApp extends App {
     constructor(props){
         super(props)
         this.store = getStore(props.initState)
+        this.state ={
+            loading:false
+        }
     }
     static async getInitialProps({Component,ctx}){
         const store = getStore()
@@ -41,7 +44,7 @@ class LayoutApp extends App {
         let props = {}
         let pageProps = {}
         if(Component.getInitialProps&&typeof Component.getInitialProps ==='function'){
-            pageProps = await Component.getInitialProps(ctx)
+            pageProps = await Component.getInitialProps(ctx,store)
         }
         props.pageProps = pageProps
         if(typeof window === 'undefined'){
@@ -49,6 +52,16 @@ class LayoutApp extends App {
         }
         // 在服务器端获取props，传递给constructor使用，在客户端使用
         return props
+    }
+    routeChangeStart = ()=>{
+        this.setState({loading:true})
+    }
+    routeChangeComplete = ()=>{
+        this.setState({loading:false})
+    }
+    componentDidMount(){
+        Router.events.on('routeChangeStart',this.routeChangeStart)
+        Router.events.on('routeChangeComplete',this.routeChangeComplete)
     }
     render() {
         let { Component,pageProps } = this.props
@@ -78,7 +91,9 @@ class LayoutApp extends App {
                         </li>
                     </ul>
                 </header>
-                <Component {...pageProps}/>
+                {
+                    this.state.loading?<div>Loading......</div>:<Component {...pageProps}/>
+                }
                 <footer style={{textAlign:"center"}}>博客尾部组件</footer>
             </Provider>
         )
